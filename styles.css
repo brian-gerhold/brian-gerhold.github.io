@@ -1,0 +1,39 @@
+body {
+  font-family: sans-serif;
+}
+
+
+a {
+   font-size:20px;
+   margin-right:30px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.line {
+  fill:none;
+}
+
+.x.axis path {
+  display: inline;
+}
+
+.y.axis path {
+  display: none;
+}
+
+.axis.y .tick line      {        
+stroke-width:1px;          
+stroke:#ccc;         
+stroke-opacity:1;       
+}
+
+.tooltip {
+fill: #2b2929;
+font-size: 80%;
+}
