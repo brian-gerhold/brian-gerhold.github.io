@@ -144,8 +144,11 @@ function addMouseOverEffects(slideInfo) {
     });
 }
 
-buildSlide1(slideInfos[0]); d3.select(jqEltId(slideInfos[0].id)).style('display','block')
-buildSlide2(slideInfos[1]); //d3.select(jqEltId(slideInfos[1].id)).style('display','block')
+buildSlide1(slideInfos[0]);  
+buildSlide2(slideInfos[1]);
 buildSlide3(slideInfos[2]);
+
+d3.select(jqEltId(slideInfos[0].id)).style('display','block'); slideInfos[0].svg.raise()
+//d3.select(jqEltId(slideInfos[1].id)).style('display','block')
 
 //for (var i = 0; i<slideCount; ++i) { window['buildSlide' + i](slideInfo); }
