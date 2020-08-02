@@ -1,18 +1,11 @@
-async function buildSlide2() {
-  const slideId                 = 's2'
-  const tooltipPointId          = slideId + 'tooltipPoint'
-  const lineIdPrefix            = slideId + 'line'
-  const legendIdPrefix          = slideId + 'legend'
-  const mouseoverRegionIdSuffix = slideId + 'mouseover'
+async function buildSlide2(slideInfo) {
+  const tooltipPointId          = slideInfo.id + 'tooltipPoint'
+  const legendIdPrefix          = slideInfo.id + 'legend'
 
-  function parseId(elt, indexIndex)   { return parseInt(elt.attr('id').substr(indexIndex)) }
-  function parseLineId(elt)           { return parseId(elt, 6) }
-  function parseLegendId(elt)         { return parseId(elt, 8) }
-  function parseMouseOverId(elt)      { return parseInt(elt.attr('id').substr(0,1))}
   function unselectedLineColor(index) { return index == 0 ? colors[index] : 'lightgrey' }
   function unselectedLineWidth(index) { return index == 0 ? 2 : 1 }
   function animationTime(index)       { return index == 0 ? 5000 : 2000 }
-  function lineSelectId(index)        { return '#' + lineIdPrefix + index }
+  function lineSelectId(index)        { return '#' + slideInfo.lineIdPrefix + index }
   function legendSelectId(index)      { return '#' + legendIdPrefix + index }
   
   function selectLine(index) {
@@ -50,7 +43,7 @@ async function buildSlide2() {
   }
 
   // append the svg object to the body of the page
-  var svg = d3.select('#' + slideId)
+  var svg = d3.select(jqEltId(slideInfo.id))
     .append('svg').attr('width', canvasWidth + canvasMargin.left + canvasMargin.right).attr('height', canvasHeight + canvasMargin.top + canvasMargin.bottom)
     .append('g').attr('transform', 'translate(' + canvasMargin.left + ',' + canvasMargin.top + ')')
 
@@ -98,7 +91,7 @@ async function buildSlide2() {
     svg.append('path')
       .datum(allData[i])
       .attr('class', 'line')
-      .attr('id', lineIdPrefix + i)
+      .attr('id', slideInfo.lineIdPrefix + i)
       .attr('stroke-linecap', 'round')
       .attr('stroke-width', unselectedLineWidth(i))
       .attr('stroke', unselectedLineColor(i))
@@ -114,7 +107,7 @@ async function buildSlide2() {
       .attr('cx', function(d) { return x(d.year) })      
       .attr('cy', function(d) { return y(d.value) })
       .attr('r', 10)
-      .attr('id', function(d) { return i + '_' + d.i + '_' + mouseoverRegionIdSuffix })
+      .attr('id', function(d) { return i + '_' + d.i + '_' + slideInfo.mouseoverRegionIdSuffix })
       .style('opacity', 0)
       .on('mouseover', function(d) {
         var thisCircle = d3.select(this)

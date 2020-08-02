@@ -1,45 +1,48 @@
-async function buildSlide1() {
-  const slideId        = 's1'
-  const lineIdPrefix   = slideId + 'line'
+async function buildSlide1(slideInfo) {
   const chartMarginTop = 50
   const flowImageSize  = 20
   
   // append the svg object to the body of the page
-  var svg = d3.select('#' + slideId)
+  var svg = d3.select(jqEltId(slideInfo.id))
     .append('svg').attr('width', canvasWidth + canvasMargin.left + canvasMargin.right).attr('height', canvasHeight + canvasMargin.top + canvasMargin.bottom)
     .append('g').attr('transform', 'translate(' + canvasMargin.left + ',' + canvasMargin.top + ')')
 
+  
   var dataFiles  = ['Nasa Co2 Ppm',      'Nasa Global Temp Change', 'Wgms Glacier Loss',     'Epa Global Mean Sea Level']
-  var unit       = ['Parts per Million', 'Change\u00B0C',           'Thickness Loss Meters', 'Change inches']
+  var units      = ['Parts per Million', 'Change\u00B0C',           'Thickness Loss Meters', 'Change inches']
   var colors     = ['Black',             tempColor,                 'DarkGray',               'DarkBlue']
   var sliceCount = [0,                   78,                        8,                       78]
   var chartCount = dataFiles.length
-  var allData    = []
-  var y          = []
-
+  var dataObjs   = []
+  var minYear    = 0
+  var maxYear    = 0
+  slideInfo.lineCount = dataFiles.length
   for (var i=0; i<dataFiles.length; ++i) {
-	  allData[i] = await d3.csv('/data/' + dataFiles[i] + '.csv')
-	  allData[i] = allData[i].slice(sliceCount[i])
+	dataObjs[i] = {}
+    dataObjs[i].values = await d3.csv('/data/' + dataFiles[i] + '.csv')
+    dataObjs[i].values = dataObjs[i].values.slice(sliceCount[i])
+    dataObjs[i].unit   = units[i]
+    dataObjs[i].color  = colors[i]
+    dataObjs[i].y      = null
+    var dataMinYear = d3.min(dataObjs[i].values, function(d) { return d.year; })
+    var dataMaxYear = d3.max(dataObjs[i].values, function(d) { return d.year; })
+    if (minYear == 0 || minYear > dataMinYear ) minYear = dataMinYear
+    if (maxYear == 0 || maxYear < dataMaxYear ) maxYear = dataMaxYear
   }
 
-  var yearMins   = allData.map( data => d3.min(data, function(d) { return d.year; }))
-  var yearMaxes  = allData.map( data => d3.max(data, function(d) { return d.year; }))
-
   //x-axes
-  var yearsMinMax = [Math.min(...yearMins), Math.max(...yearMaxes)]
-  var x = d3.scaleLinear().domain(yearsMinMax).range([ 0, canvasWidth ])
+  var x = d3.scaleLinear().domain([minYear, maxYear]).range([ 0, canvasWidth ])
 
-
-  var chartHeight    = (canvasHeight  - (chartMarginTop * (chartCount - 1)) )/chartCount
-  for (var i=0; i<dataFiles.length; ++i) {
+  var chartHeight = (canvasHeight  - (chartMarginTop * (chartCount - 1)) )/chartCount
+  for (var i=0; i<chartCount; ++i) {
     
     var yTop       = chartHeight*(i+1) + (chartMarginTop * i)
     var yBottom    = chartHeight*(i) + (chartMarginTop * i)
-    var data       = allData[i]
+    var data       = dataObjs[i].values
     var nameTokens = dataFiles[i].split(' ')
     var sourceName = nameTokens[0]
     var chartTitle = nameTokens.slice(1).join(' ') + ', ' + sourceName
-    var chartColor = colors[i]
+    var chartColor = dataObjs[i].color
 
     //Chart title
     svg.append('text')
@@ -52,24 +55,24 @@ async function buildSlide1() {
     //y-axis
     svg.append('g').attr('transform', 'translate(0,' + yTop + ')').call(d3.axisBottom(x).tickFormat(d3.format('d')));
     var dataMinMax = [d3.min(data, function(d) { return +d.value; }), d3.max(data, function(d) { return +d.value; })]
-    y[i] = d3.scaleLinear().domain(dataMinMax).range([ yTop, yBottom ]);
-    svg.append('g').call(d3.axisLeft(y[i]).ticks(5))      
+    dataObjs[i].y = d3.scaleLinear().domain(dataMinMax).range([ yTop, yBottom ]);
+    svg.append('g').call(d3.axisLeft(dataObjs[i].y).ticks(5))      
     //y-axis label
     svg.append('text').attr('transform', 'rotate(-90)').attr("y", 0 - canvasMargin.left + 10)
       .attr('x', 0 - yBottom - (chartHeight/2))
       .attr('dy', '0.1em')
       .style('font-size', '70%')
-      .style("text-anchor", "middle").text(unit[i])
+      .style('text-anchor', 'middle').text(dataObjs[i].unit)
 
     //line
     svg.append('path')
-      .datum(allData[i])
+      .datum(data)
       .attr('class', 'line')
-      .attr('id', lineIdPrefix + i)
+      .attr('id', slideInfo.lineIdPrefix + i)
       .attr('stroke-linecap', 'round')
       .attr('stroke-width', 2)
       .attr('stroke', chartColor)
-      .attr('d', d3.line().x(function(d) { return x(d.year) }).y(function(d) { return y[i](+d.value) }))
+      .attr('d', d3.line().x(function(d) { return x(d.year) }).y(function(d) { return dataObjs[i].y(+d.value) }))
       
     //image to next chart
     if (i != 0) {
@@ -81,4 +84,67 @@ async function buildSlide1() {
 	      .attr('height', flowImageSize)
     }
   }
+
+  var mouseG = svg.append('g').attr('class', 'mouse-over-effects');
+  for (var i=0; i<chartCount; ++i) {
+    var lineDataPoint = mouseG.selectAll(classId(lineDataPointClass))
+      .data(dataObjs[i].values).enter().append('g')
+      .attr('class', lineDataPointClass)
+      .attr('id', lineDataPointId(slideInfo, i))
+
+    lineDataPoint.append('circle')
+      .attr('r', 5)
+      .style('stroke', dataObjs[i].color)
+      .style('fill', 'none')
+      .style('stroke-width', '1px')
+      .style('opacity', '1');
+
+    lineDataPoint.append('text').attr('transform', 'translate(-15,-10)');
+  }
+  
+  //mouse-tracking vertical line
+  mouseG.append('path').attr('class', trackingLineClass).style('stroke', 'black').style('stroke-width', '1px').style('opacity', '0');
+  var lines = document.getElementsByClassName('line');
+  mouseG.append('svg:rect') // append a rect to catch mouse movements on canvas
+    .attr('width', canvasWidth) // can't catch mouse events on a g element
+    .attr('height', canvasHeight)
+    .attr('fill', 'none')
+    .attr('pointer-events', 'all')
+    .on('mouseover', function() { setDataPointVisibility(slideInfo, true) })
+    .on('mouseout',  function() { setDataPointVisibility(slideInfo, false) })
+    .on('mousemove', function() {
+      var mouse = d3.mouse(this);
+      d3.select(classId(trackingLineClass)).attr('d', function() {
+        var d = "M" + mouse[0] + "," + canvasHeight;
+        d += " " + mouse[0] + "," + 0;
+        return d;
+      });
+      
+      for (var i =0; i<chartCount; ++i ) {
+        d3.select(jqEltId(lineDataPointId(slideInfo, i)))
+          .attr('transform', function(d) {
+            //console.log(canvasWidth/mouse[0])
+            //var xDate     = x.invert(mouse[0])
+            //var bisect    = d3.bisector(function(d) { return d.year; }).right
+            //var idx       = bisect(d.value, xDate)
+            var beginning = 0
+            var end       = lines[i].getTotalLength()
+            var target    = null
+            
+            while (true) {
+              target = Math.floor((beginning + end) / 2);
+              pos = lines[i].getPointAtLength(target);
+              if ((target === end || target === beginning) && pos.x !== mouse[0]) {
+                  break;
+              }
+              if (pos.x > mouse[0])      end = target;
+              else if (pos.x < mouse[0]) beginning = target;
+              else break; //position found
+            }
+    
+            d3.select(this).select('text').text(dataObjs[i].y.invert(pos.y).toFixed(2));
+            return 'translate(' + mouse[0] + ',' + pos.y + ')';
+          });
+      }
+    });
 }
