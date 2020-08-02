@@ -1,11 +1,15 @@
 
 const slideCount        = 3
+var   currentSlide      = 1
 const totalCanvasWidth  = 1000
 const totalCanvasHeight = 700
 
-const canvasMargin = {top: 10, right: 30, bottom: 30, left: 60}
+const canvasMargin = {top: 50, bottom: 30, right: 50, left: 100}
 const canvasWidth  = totalCanvasWidth - canvasMargin.left - canvasMargin.right
 const canvasHeight = totalCanvasHeight  - canvasMargin.top - canvasMargin.bottom
+const navImageHeight  = 40
+const navImageWidth   = 30
+const yLabelX         = -50
 
 const tempColor          = 'DarkRed'
 	
@@ -43,6 +47,28 @@ for (var i = 0; i<slideCount; ++i) {
   slideInfo.svg = slideDiv
     .append('svg').attr('width', canvasWidth + canvasMargin.left + canvasMargin.right).attr('height', canvasHeight + canvasMargin.top + canvasMargin.bottom)
     .append('g').attr('transform', 'translate(' + canvasMargin.left + ',' + canvasMargin.top + ')')
+  if (i != 0)
+    slideInfo.svg.append('image')
+      .attr('href', 'images/previous-icon.jpeg')
+      .attr('x', yLabelX - 40)
+      .attr('y', canvasHeight/2)
+      .attr('width', navImageWidth)
+      .attr('height', navImageHeight)
+      .on('mouseover',  function() { d3.select(this).attr('width', navImageWidth + 5).attr('height', navImageHeight + 5) })
+      .on('mouseout',   function() { d3.select(this).attr('width', navImageWidth).attr('height', navImageHeight) })
+      .on('click',      function() { slideBackward() })
+  if (i != slideCount - 1)
+    slideInfo.svg.append('image')
+      .attr('href', 'images/next-icon.jpeg')
+      .attr('x', canvasWidth + 15)
+      .attr('y', canvasHeight/2)
+      .attr('width', navImageWidth)
+      .attr('height', navImageHeight)
+      .on('mouseover',  function() { d3.select(this).attr('width', navImageWidth + 5).attr('height', navImageHeight + 5) })
+      .on('mouseout',   function() { d3.select(this).attr('width', navImageWidth).attr('height', navImageHeight) })
+      .on('click',      function() { slideForward() })
+      .raise()
+
   slideInfos[i] = slideInfo
 }
 
@@ -144,11 +170,25 @@ function addMouseOverEffects(slideInfo) {
     });
 }
 
+function slideForward() {
+  d3.select(jqEltId(slideInfos[currentSlide -1].id)).style('display','none')
+  d3.select(jqEltId(slideInfos[currentSlide].id)).style('display','block')
+  slideInfos[currentSlide].svg.raise()
+  ++currentSlide
+}
+
+function slideBackward() {
+  d3.select(jqEltId(slideInfos[currentSlide - 1].id)).style('display','none')
+  d3.select(jqEltId(slideInfos[currentSlide - 2].id)).style('display','block')
+  slideInfos[currentSlide - 2].svg.raise()
+  --currentSlide
+}
+
 buildSlide1(slideInfos[0]);  
 buildSlide2(slideInfos[1]);
 buildSlide3(slideInfos[2]);
 
-d3.select(jqEltId(slideInfos[0].id)).style('display','block'); slideInfos[0].svg.raise()
+d3.select(jqEltId(slideInfos[currentSlide -1].id)).style('display','block'); slideInfos[currentSlide -1].svg.raise()
 //d3.select(jqEltId(slideInfos[1].id)).style('display','block')
 
 //for (var i = 0; i<slideCount; ++i) { window['buildSlide' + i](slideInfo); }

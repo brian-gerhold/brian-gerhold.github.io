@@ -41,7 +41,7 @@ async function buildSlide1(slideInfo) {
     slideInfo.dataObjs[i].y = d3.scaleLinear().domain(dataMinMax).range([ yTop, yBottom ]);
     slideInfo.svg.append('g').call(d3.axisLeft(slideInfo.dataObjs[i].y).ticks(5))      
     //y-axis label
-    slideInfo.svg.append('text').attr('transform', 'rotate(-90)').attr("y", 0 - canvasMargin.left + 10)
+    slideInfo.svg.append('text').attr('transform', 'rotate(-90)').attr("y", yLabelX)
       .attr('x', 0 - yBottom - (chartHeight/2))
       .attr('dy', '0.1em')
       .style('font-size', '70%')

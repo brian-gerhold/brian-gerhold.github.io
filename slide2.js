@@ -60,7 +60,7 @@ async function buildSlide2(slideInfo) {
   var dataMinMax = [Math.min(...valueMins) - 0.1, Math.max(...valueMaxes)]
   var y = d3.scaleLinear().domain(dataMinMax).range([ canvasHeight, 0 ]);
   slideInfo.svg.append('g').call(d3.axisLeft(y))
-  slideInfo.svg.append('text').attr('transform', 'rotate(-90)').attr("y", 0 - canvasMargin.left)
+  slideInfo.svg.append('text').attr('transform', 'rotate(-90)').attr("y", yLabelX)
     .attr("x",0 - (canvasHeight / 2))
     .attr("dy", "1em")
     .style("text-anchor", "middle")
