@@ -5,10 +5,6 @@ async function buildSlide2() {
   const legendIdPrefix          = slideId + 'legend'
   const mouseoverRegionIdSuffix = slideId + 'mouseover'
 
-  var margin = {top: 10, right: 30, bottom: 30, left: 60}
-  var width  = 800 - margin.left - margin.right
-  var height = 600 - margin.top - margin.bottom
-
   function parseId(elt, indexIndex)   { return parseInt(elt.attr('id').substr(indexIndex)) }
   function parseLineId(elt)           { return parseId(elt, 6) }
   function parseLegendId(elt)         { return parseId(elt, 8) }
@@ -55,11 +51,11 @@ async function buildSlide2() {
 
   // append the svg object to the body of the page
   var svg = d3.select('#' + slideId)
-    .append('svg').attr('width', width + margin.left + margin.right).attr('height', height + margin.top + margin.bottom)
-    .append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+    .append('svg').attr('width', canvasWidth + canvasMargin.left + canvasMargin.right).attr('height', canvasHeight + canvasMargin.top + canvasMargin.bottom)
+    .append('g').attr('transform', 'translate(' + canvasMargin.left + ',' + canvasMargin.top + ')')
 
-  var dataFiles  = ['Nasa Global Temp Change', '1975 Broecker', '1981 Hansen', '1988 Hansen', '1990 Ipcc1',     '1995 Ipcc2', '2001 Ipcc3', '2007 Ipcc4',    '2013 Ipcc5']
-  var colors     = ['black',                   'darkred',       'chocolate',   'brown',       'cornflowerblue', 'cadetblue',  'royalblue',  'darkslateblue', 'steelblue']
+  var dataFiles  = ['Nasa Global Temp Change', '1975 Broecker', '1981 Hansen', '1988 Hansen', '1990 Ipcc1',  '1995 Ipcc2', '2001 Ipcc3', '2007 Ipcc4',  '2013 Ipcc5']
+  var colors     = [tempColor,                 'Indigo',        'SaddleBrown', 'Sienna',      'DarkBlue',    'MediumBlue', 'Blue',       'DeepSkyBlue', 'LightSkyBlue']
   var allData    = []
   
   for (var i=0; i<dataFiles.length; ++i) {
@@ -69,22 +65,24 @@ async function buildSlide2() {
   allData[0]     = allData[0].slice(90)
   var yearMins   = allData.map( data => d3.min(data, function(d) { return d.year; }))
   var yearMaxes  = allData.map( data => d3.max(data, function(d) { return d.year; }))
-  var deltaMins  = allData.map( data => d3.min(data, function(d) { return d.value; }))
-  var deltaMaxes = allData.map( data => d3.max(data, function(d) { return d.value; }))
+  var deltaMins  = allData.map( data => d3.min(data, function(d) { return +d.value; }))
+  var deltaMaxes = allData.map( data => d3.max(data, function(d) { return +d.value; }))
 
   //x-axis
   var yearsMinMax = [Math.min(...yearMins), Math.max(...yearMaxes)]
-  var x = d3.scaleLinear().domain(yearsMinMax).range([ 0, width ])
-  svg.append('g').attr('transform', 'translate(0,' + height + ')').call(d3.axisBottom(x).tickFormat(d3.format('d')));
+  var x = d3.scaleLinear().domain(yearsMinMax).range([ 0, canvasWidth ])
+  svg.append('g').attr('transform', 'translate(0,' + canvasHeight + ')').call(d3.axisBottom(x).tickFormat(d3.format('d')));
 
   //y-axis
-  var dataMinMax = [Math.min(...deltaMins) - 0.2, Math.max(...deltaMaxes)]
-  var y = d3.scaleLinear().domain(dataMinMax).range([ height, 0 ]);
+  var dataMinMax = [Math.min(...deltaMins) - 0.1, Math.max(...deltaMaxes)]
+  var y = d3.scaleLinear().domain(dataMinMax).range([ canvasHeight, 0 ]);
   svg.append('g').call(d3.axisLeft(y))
-  svg.append('text').attr('transform', 'rotate(-90)').attr("y", 0 - margin.left)
-    .attr("x",0 - (height / 2))
+  svg.append('text').attr('transform', 'rotate(-90)').attr("y", 0 - canvasMargin.left)
+    .attr("x",0 - (canvasHeight / 2))
     .attr("dy", "1em")
-    .style("text-anchor", "middle").text('Global temperature change \u00B0C')
+    .style("text-anchor", "middle")
+    .style('font-size', '70%')
+    .text('Global temperature change \u00B0C')
 
   //tooltip
   const tooltip = d3.select("body").append("div")
@@ -148,9 +146,11 @@ async function buildSlide2() {
       .on('mouseout',  function(d) { unselectLine(parseLegendId(d3.select(this))) })
   }
   
+  /*
   d3.selectAll('.line').style('opacity', '0')
   for (var i=0; i<dataFiles.length; ++i) {
     animateLine(i)
     await sleep(animationTime(i))
   }
+  */
 }
