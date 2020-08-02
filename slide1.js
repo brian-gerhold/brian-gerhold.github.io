@@ -87,17 +87,16 @@ async function buildSlide1(slideInfo) {
 
   var mouseG = svg.append('g').attr('class', 'mouse-over-effects');
   for (var i=0; i<chartCount; ++i) {
-    var lineDataPoint = mouseG.selectAll(classId(lineDataPointClass))
-      .data(dataObjs[i].values).enter().append('g')
-      .attr('class', lineDataPointClass)
-      .attr('id', lineDataPointId(slideInfo, i))
+    var lineDataPoint = mouseG.append('g')
+        .attr('class', lineDataPointClass)
+        .attr('id', lineDataPointId(slideInfo, i))
 
     lineDataPoint.append('circle')
       .attr('r', 5)
       .style('stroke', dataObjs[i].color)
       .style('fill', 'none')
       .style('stroke-width', '1px')
-      .style('opacity', '1');
+      .style('opacity', '0');
 
     lineDataPoint.append('text').attr('transform', 'translate(-15,-10)');
   }
@@ -122,14 +121,11 @@ async function buildSlide1(slideInfo) {
       
       for (var i =0; i<chartCount; ++i ) {
         d3.select(jqEltId(lineDataPointId(slideInfo, i)))
-          .attr('transform', function(d) {
-            //console.log(canvasWidth/mouse[0])
-            //var xDate     = x.invert(mouse[0])
-            //var bisect    = d3.bisector(function(d) { return d.year; }).right
-            //var idx       = bisect(d.value, xDate)
+          .attr('transform', function() {
             var beginning = 0
             var end       = lines[i].getTotalLength()
             var target    = null
+            var pos
             
             while (true) {
               target = Math.floor((beginning + end) / 2);
@@ -141,8 +137,9 @@ async function buildSlide1(slideInfo) {
               else if (pos.x < mouse[0]) beginning = target;
               else break; //position found
             }
-    
+
             d3.select(this).select('text').text(dataObjs[i].y.invert(pos.y).toFixed(2));
+
             return 'translate(' + mouse[0] + ',' + pos.y + ')';
           });
       }

@@ -25,8 +25,8 @@ function parseMouseOverId(elt)         { return parseInt(elt.attr('id').substr(0
 function setDataPointVisibility(slideInfo, visible) {
   d3.select(classId(trackingLineClass)).style('opacity', visible ? '1' : '0')
   for (var i=0; i<slideInfo.lineCount; ++i) {
-    //d3.select(jqEltId(lineDataPointId(slideInfo, i))).select('circle').style('opacity', visible ? '1' : '0')
-    //d3.select(jqEltId(lineDataPointId(slideInfo, i))).select('text').style('opacity', visible ? '1' : '0')
+    d3.select(jqEltId(lineDataPointId(slideInfo, i))).select('circle').style('opacity', visible ? '1' : '0')
+    d3.select(jqEltId(lineDataPointId(slideInfo, i))).select('text').style('opacity', visible ? '1' : '0')
   }
 }
 
@@ -43,6 +43,6 @@ for (var i = 0; i<slideCount; ++i) {
   //window['buildSlide' + i](slideInfo);
 }
 
-//buildSlide1(slideInfos[0])
-buildSlide2(slideInfos[1])
+buildSlide1(slideInfos[0])
+//buildSlide2(slideInfos[1])
 //buildSlide3(slideInfos[2])
