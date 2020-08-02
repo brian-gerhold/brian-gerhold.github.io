@@ -71,20 +71,6 @@ async function buildSlide2(slideInfo) {
 	slideInfo.dataObjs[i].x = x
     slideInfo.dataObjs[i].y = y
 
-    /*
-    //line
-    slideInfo.svg.append('path')
-      .datum(slideInfo.dataObjs[i].values)
-      .attr('class', lineClass)
-      .attr('id', slideInfo.lineIdPrefix + i)
-      .attr('stroke-linecap', 'round')
-      .attr('stroke-width', unselectedLineWidth(i))
-      .attr('stroke', unselectedLineColor(i))
-      .attr('d', d3.line().x(function(d) { return x(d.year) }).y(function(d) { return y(d.value) }))
-      .on('mouseover', function(d) { selectLine(  parseLegendId(d3.select(this))) })
-      .on('mouseout',  function(d) { unselectLine(parseLegendId(d3.select(this))) })
-      */
-
     //legend
     slideInfo.svg.append('text')
       .attr('class', 'legend')
@@ -108,5 +94,5 @@ async function buildSlide2(slideInfo) {
   addDataLines(slideInfo)
   addMouseOverEffects(slideInfo)
   
-  for (var i=0; i<slideInfo.lineCount; ++i) {unselectLine(i)}
+  for (var i=1; i<slideInfo.lineCount; ++i) {unselectLine(i)}
 }

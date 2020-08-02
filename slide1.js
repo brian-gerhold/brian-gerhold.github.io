@@ -57,7 +57,7 @@ async function buildSlide1(slideInfo) {
 	      .attr('height', flowImageSize)
     }
   }
-  
+
   addDataLines(slideInfo)
   addMouseOverEffects(slideInfo)
 }
