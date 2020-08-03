@@ -2,10 +2,10 @@ async function buildSlide1(slideInfo) {
   const chartMarginTop = 50
   const flowImageSize  = 20
 
-  var dataFiles   = ['Nasa Co2 Ppm',      'Nasa Global Temp Change', 'Wgms Glacier Loss',     'Epa Global Mean Sea Level']
-  var units       = ['Parts per Million', 'Change\u00B0C',           'Thickness Loss Meters', 'Change inches']
-  var colors      = ['Black',             tempColor,                 'DarkGray',               'DarkBlue']
-  var sliceCounts = [0,                   78,                        8,                       78]
+  var dataFiles   = ['Nasa Co2 Ppm',          'Nasa Global Temp Change', 'Wgms Glacier Loss',     'Epa Global Mean Sea Level']
+  var units       = ['Co2 Parts per Million', 'Change\u00B0C',           'Thickness Loss Meters', 'Change inches']
+  var colors      = ['Black',                 tempColor,                 'DarkGray',               'DarkBlue']
+  var sliceCounts = [0,                       78,                        8,                       78]
   var chartCount  = dataFiles.length
   
   await populateDataObjs(slideInfo, dataFiles, colors, sliceCounts)
@@ -58,6 +58,7 @@ async function buildSlide1(slideInfo) {
     }
   }
 
+  addSlideTitle(slideInfo, 'Unregulated CO2 Emissions Causal Impacts', 200)
   addDataLines(slideInfo)
   addMouseOverEffects(slideInfo)
 }

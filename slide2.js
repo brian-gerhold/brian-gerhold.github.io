@@ -44,7 +44,7 @@ async function buildSlide2(slideInfo) {
   }
 
   var dataFiles   = ['Nasa Global Temp Change', '1975 Broecker', '1981 Hansen', '1988 Hansen', '1990 Ipcc1',  '1995 Ipcc2', '2001 Ipcc3', '2007 Ipcc4',  '2013 Ipcc5']
-  var colors      = [tempColor,                 'Indigo',        'SaddleBrown', 'Sienna',      'DarkBlue',    'MediumBlue', 'Blue',       'DeepSkyBlue', 'LightSkyBlue']
+  var colors      = [tempColor,                 'Indigo',        'DarkOrange',  'Orange',      'DarkBlue',    'MediumBlue', 'Blue',       'DeepSkyBlue', 'LightSkyBlue']
   var sliceCounts = [90,                        0,               0,             0,             0,             0,            0,            0,             0]
   
   await populateDataObjs(slideInfo, dataFiles, colors, sliceCounts)
@@ -77,10 +77,33 @@ async function buildSlide2(slideInfo) {
       .attr('id', legendIdPrefix + i)
       .attr('x', 20)
       .attr('y', 15 + i*20)
-      .attr('stroke', unselectedLineColor(i))
+      .attr('stroke', colors[i])
       .text((i == 0 ? 'Actual' : 'Prediction: ' + dataFiles[i].substr(5)) + ', ' + dataFiles[i].substr(0,4))
       .on('mouseover', function(d) { selectLine(  parseLegendId(d3.select(this))) })
       .on('mouseout',  function(d) { unselectLine(parseLegendId(d3.select(this))) })
+      
+    if (i == 0) {
+      var eventYear = 2019
+      slideInfo.svg.append('rect')
+        .attr('width',  2)
+        .attr('height', canvasHeight - 40)
+        .attr('x',      slideInfo.dataObjs[i].x(eventYear))
+        .attr('y',      0 + 40 )
+        .attr('fill',   'DarkGray')
+      slideInfo.svg.append('text')
+        .attr('stroke', tempColor)
+        .attr('x', slideInfo.dataObjs[i].x(eventYear) - 80)
+        .attr('y', canvasHeight - 150)
+        .attr('fill', canvasHeight - 150)
+        .style('font-size', '80%')
+        .text('Most predictions')
+      slideInfo.svg.append('text')
+        .attr('stroke', tempColor)
+        .attr('x', slideInfo.dataObjs[i].x(eventYear) - 80)
+        .attr('y', canvasHeight - 135)
+        .style('font-size', '80%')
+        .text('underestimated')
+    }
   }
   
   /*
@@ -91,8 +114,10 @@ async function buildSlide2(slideInfo) {
   }
   */
 
+  addSlideTitle(slideInfo, 'Science-based Predictions Tracked Actual Changes', 250)
   addDataLines(slideInfo)
   addMouseOverEffects(slideInfo)
   
-  for (var i=1; i<slideInfo.lineCount; ++i) {unselectLine(i)}
+  d3.select(jqEltId(lineId(slideInfo,0))).attr('stroke-width', 5)
+  //for (var i=1; i<slideInfo.lineCount; ++i) {unselectLine(i)}
 }

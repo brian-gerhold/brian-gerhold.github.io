@@ -72,6 +72,15 @@ for (var i = 0; i<slideCount; ++i) {
   slideInfos[i] = slideInfo
 }
 
+function addSlideTitle(slideInfo, title, xOffset) {
+  slideInfo.svg.append('text')
+    .attr('stroke', 'Black')
+    .attr('x', canvasWidth / 2 - xOffset)
+    .attr('y', - 20)
+    .style('font-size', '150%')
+    .text(title)
+}
+
 async function populateDataObjs(slideInfo, dataFiles, lineColors, sliceCounts) {
   slideInfo.lineCount = dataFiles.length
   var minYear     = 0
