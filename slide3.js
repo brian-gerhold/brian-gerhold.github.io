@@ -104,6 +104,6 @@ async function buildSlide3() {
   }
 
   addSlideTitle(slideInfo, 'Other Emmissions Regulations Proved Very Effective', 225)
-  addDataLines(slideInfo)
+  addDataLines(slideInfo, true)
   addMouseOverEffects(slideInfo)
 }

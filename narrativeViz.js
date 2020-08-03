@@ -1,6 +1,7 @@
 
 const slideCount        = 3
 var   currentSlide      = 1
+var   slide2Rendered    = false
 const totalCanvasWidth  = 1000
 const totalCanvasHeight = 700
 
@@ -91,6 +92,7 @@ async function populateDataObjs(slideInfo, dataFiles, lineColors, sliceCounts) {
     slideInfo.dataObjs[i].values  = await d3.csv('/data/' + dataFiles[i] + '.csv')
     slideInfo.dataObjs[i].values  = slideInfo.dataObjs[i].values.slice(sliceCounts[i])
     slideInfo.dataObjs[i].color   = lineColors[i]
+    slideInfo.dataObjs[i].enabled = true
     slideInfo.dataObjs[i].y       = null
     slideInfo.dataObjs[i].minYear = d3.min(slideInfo.dataObjs[i].values, function(d) { return +d.year; })
     slideInfo.dataObjs[i].maxYear = d3.max(slideInfo.dataObjs[i].values, function(d) { return +d.year; })
@@ -101,7 +103,7 @@ async function populateDataObjs(slideInfo, dataFiles, lineColors, sliceCounts) {
   slideInfo.maxYear = maxYear
 }
 
-function addDataLines(slideInfo) {
+function addDataLines(slideInfo, visible) {
   for (var i=0; i<slideInfo.lineCount; ++i) {
     slideInfo.svg.append('path')
       .datum(slideInfo.dataObjs[i].values)
@@ -110,6 +112,7 @@ function addDataLines(slideInfo) {
       .attr('stroke-width', 2)
       .attr('stroke', slideInfo.dataObjs[i].color)
       .attr('fill', 'none')
+      .attr('opacity', visible ? '1' : '0')
       .attr('d', d3.line().x(function(d) { return  slideInfo.dataObjs[i].x(d.year) }).y(function(d) { return slideInfo.dataObjs[i].y(+d.value) }))
   }
 }
@@ -170,7 +173,7 @@ function addMouseOverEffects(slideInfo) {
             var year = d3.format('d')(slideInfo.dataObjs[i].x.invert(mouse[0]))
             //d3.select(jqEltId(slideInfo.trackingLineId)).select('text').attr('x', slideInfo.dataObjs[i].x(year)).text(year)
             
-            var pointVisibility = (slideInfo.dataObjs[i].minYear <= year && slideInfo.dataObjs[i].maxYear >= year)
+            var pointVisibility =  slideInfo.dataObjs[i].enabled && (slideInfo.dataObjs[i].minYear <= year && slideInfo.dataObjs[i].maxYear >= year)
         	setDataPointVisibility(slideInfo, pointVisibility, i)
         	if (pointVisibility) d3.select(pointEltId).select('text').text(slideInfo.dataObjs[i].y.invert(pos.y).toFixed(2))
             return 'translate(' + mouse[0] + ',' + pos.y + ')';
@@ -184,6 +187,10 @@ function slideForward() {
   d3.select(jqEltId(slideInfos[currentSlide].id)).style('display','block')
   slideInfos[currentSlide].svg.raise()
   ++currentSlide
+  if (!slide2Rendered) {
+    buildSlide2(slideInfos[1]);
+    slide2Rendered = true
+  }
 }
 
 function slideBackward() {
@@ -194,7 +201,7 @@ function slideBackward() {
 }
 
 buildSlide1(slideInfos[0]);  
-buildSlide2(slideInfos[1]);
+//buildSlide2(slideInfos[1]);
 buildSlide3(slideInfos[2]);
 
 d3.select(jqEltId(slideInfos[currentSlide -1].id)).style('display','block'); slideInfos[currentSlide -1].svg.raise()

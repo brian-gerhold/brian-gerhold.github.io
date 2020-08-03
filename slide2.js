@@ -1,37 +1,41 @@
 async function buildSlide2(slideInfo) {
-  const tooltipPointId          = slideInfo.id + 'tooltipPoint'
   const legendIdPrefix          = slideInfo.id + 'legend'
 
   function unselectedLineColor(index) { return index == 0 ? colors[index] : 'lightgrey' }
   function unselectedLineWidth(index) { return index == 0 ? 2 : 1 }
   function animationTime(index)       { return index == 0 ? 5000 : 2000 }
-  function lineSelectId(index)        { return jqEltId(slideInfo.lineIdPrefix + index) }
   function legendSelectId(index)      { return jqEltId(legendIdPrefix + index) }
   function parseLegendId(elt)         { return parseId(elt, 8) }
 
-  function selectLine(index) {
+  function selectLine(index, updateState) {
     var color = colors[index]
-    d3.select(lineSelectId(index)).style('stroke-width', 3).attr('stroke', color)
+    d3.select(jqEltId(lineId(slideInfo, index))).style('stroke-width', 3).attr('stroke', color)
     d3.select(legendSelectId(index)).style('font-size', '110%').attr('stroke', color)
+    if (updateState) slideInfo.dataObjs[index].enabled = true
   }
 
-  function unselectLine(index) {
+  function unselectLine(index, updateState) {
     var color = unselectedLineColor(index)
-    d3.select(lineSelectId(index)).style('stroke-width', unselectedLineWidth(index)).attr('stroke', color)
-    d3.select(legendSelectId(index)).style('font-size', '100%').attr('stroke', color)  
+    d3.select(jqEltId(lineId(slideInfo,index))).style('stroke-width', unselectedLineWidth(index)).attr('stroke', color)
+    d3.select(legendSelectId(index)).style('font-size', '100%').attr('stroke', color)
+    if (updateState) slideInfo.dataObjs[index].enabled = false
+  }
+  
+  function toggleLine(index) {
+    if (slideInfo.dataObjs[index].enabled) unselectLine(index)
+    else selectLine(index, true)
   }
 
   function animateLine(index) {
-    var lineId      = lineSelectId(index)
+    var lineElt     = d3.select(jqEltId(lineId(slideInfo, index)))
     var legendId    = legendSelectId(index)
     var preColor    = colors[index]
     var postColor   = unselectedLineColor(index, colors)
     var animateTime = animationTime(index)
-    var totalLength = d3.select(lineId).node().getTotalLength();
-    d3.select(lineId).style('opacity','1')
-    d3.selectAll(lineId)
+    var totalLength = lineElt.node().getTotalLength();
+    lineElt.style('opacity','1')
     d3.select(legendId).attr('stroke', preColor).transition().duration(animateTime).attr('stroke', postColor)
-    d3.select(lineId)
+    lineElt
       .style('opacity','1')
       .style('stroke-width', 4)
       .attr('stroke-dasharray', totalLength + ' ' + totalLength)
@@ -41,6 +45,7 @@ async function buildSlide2(slideInfo) {
       .attr('stroke-dashoffset', 0)
       .attr('stroke', postColor)
       .style('stroke-width', unselectedLineWidth(index))
+    slideInfo.dataObjs[i].enabled = (index == 0)
   }
 
   var dataFiles   = ['Nasa Global Temp Change', '1975 Broecker', '1981 Hansen', '1988 Hansen', '1990 Ipcc1',  '1995 Ipcc2', '2001 Ipcc3', '2007 Ipcc4',  '2013 Ipcc5']
@@ -67,20 +72,28 @@ async function buildSlide2(slideInfo) {
     .style('font-size', '70%')
     .text('Global temperature change \u00B0C')
 
+  var legendGroup = slideInfo.svg.append('g')
   for (var i=0; i<slideInfo.lineCount; ++i) {
 	slideInfo.dataObjs[i].x = x
     slideInfo.dataObjs[i].y = y
 
     //legend
-    slideInfo.svg.append('text')
+    legendGroup.append('text')
       .attr('class', 'legend')
       .attr('id', legendIdPrefix + i)
       .attr('x', 20)
       .attr('y', 15 + i*20)
-      .attr('stroke', colors[i])
+      .attr('stroke', unselectedLineColor(colors[i]))
       .text((i == 0 ? 'Actual' : 'Prediction: ' + dataFiles[i].substr(5)) + ', ' + dataFiles[i].substr(0,4))
-      .on('mouseover', function(d) { selectLine(  parseLegendId(d3.select(this))) })
-      .on('mouseout',  function(d) { unselectLine(parseLegendId(d3.select(this))) })
+      .on('mouseover', function(d) {
+        var lineIndex = parseLegendId(d3.select(this))
+        if (!slideInfo.dataObjs[lineIndex].enabled) selectLine(lineIndex, false)
+      })
+      .on('mouseout',  function(d) {
+        var lineIndex = parseLegendId(d3.select(this))
+        if (!slideInfo.dataObjs[lineIndex].enabled) unselectLine(lineIndex, false)
+      })
+      .on('click',     function(d) { toggleLine(parseLegendId(d3.select(this))) })
       
     if (i == 0) {
       var eventYear = 2019
@@ -106,18 +119,17 @@ async function buildSlide2(slideInfo) {
     }
   }
   
-  /*
+  addSlideTitle(slideInfo, 'Science-based Predictions Tracked Actual Changes', 250)
+  addDataLines(slideInfo, false)
+  addMouseOverEffects(slideInfo)
+  
   d3.selectAll('.line').style('opacity', '0')
   for (var i=0; i<slideInfo.lineCount; ++i) {
     animateLine(i)
     await sleep(animationTime(i))
   }
-  */
-
-  addSlideTitle(slideInfo, 'Science-based Predictions Tracked Actual Changes', 250)
-  addDataLines(slideInfo)
-  addMouseOverEffects(slideInfo)
   
   d3.select(jqEltId(lineId(slideInfo,0))).attr('stroke-width', 5)
-  //for (var i=1; i<slideInfo.lineCount; ++i) {unselectLine(i)}
+  //for (var i=1; i<slideInfo.lineCount; ++i) { d3.select(legendSelectId(index)).raise() }
+  legendGroup.raise()
 }

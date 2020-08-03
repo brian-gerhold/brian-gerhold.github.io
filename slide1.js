@@ -59,6 +59,6 @@ async function buildSlide1(slideInfo) {
   }
 
   addSlideTitle(slideInfo, 'Unregulated CO2 Emissions Causal Impacts', 200)
-  addDataLines(slideInfo)
+  addDataLines(slideInfo, true)
   addMouseOverEffects(slideInfo)
 }
