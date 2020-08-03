@@ -98,12 +98,16 @@ async function buildSlide2(slideInfo) {
     if (i == 0) {
       var eventYear = 2019
       slideInfo.svg.append('rect')
+        .attr('id',     's2_dropline')
+        .attr('opacity','0')
         .attr('width',  2)
         .attr('height', canvasHeight - 40)
         .attr('x',      slideInfo.dataObjs[i].x(eventYear))
         .attr('y',      0 + 40 )
         .attr('fill',   'DarkGray')
       slideInfo.svg.append('text')
+        .attr('id',     's2_text1')
+        .attr('opacity','0')
         .attr('stroke', tempColor)
         .attr('x', slideInfo.dataObjs[i].x(eventYear) - 80)
         .attr('y', canvasHeight - 150)
@@ -111,6 +115,8 @@ async function buildSlide2(slideInfo) {
         .style('font-size', '80%')
         .text('Most predictions')
       slideInfo.svg.append('text')
+        .attr('id',     's2_text2')
+        .attr('opacity','0')
         .attr('stroke', tempColor)
         .attr('x', slideInfo.dataObjs[i].x(eventYear) - 80)
         .attr('y', canvasHeight - 135)
@@ -128,8 +134,11 @@ async function buildSlide2(slideInfo) {
     animateLine(i)
     await sleep(animationTime(i))
   }
-  
+
   d3.select(jqEltId(lineId(slideInfo,0))).attr('stroke-width', 5)
   //for (var i=1; i<slideInfo.lineCount; ++i) { d3.select(legendSelectId(index)).raise() }
   legendGroup.raise()
+  d3.select(jqEltId('s2_dropline')).attr('opacity','1')
+  d3.select(jqEltId('s2_text1')).attr('opacity','1')
+  d3.select(jqEltId('s2_text2')).attr('opacity','1')
 }
