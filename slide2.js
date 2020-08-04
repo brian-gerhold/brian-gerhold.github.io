@@ -22,7 +22,7 @@ async function buildSlide2(slideInfo) {
   }
   
   function toggleLine(index) {
-    if (slideInfo.dataObjs[index].enabled) unselectLine(index)
+    if (slideInfo.dataObjs[index].enabled) unselectLine(index, true)
     else selectLine(index, true)
   }
 
